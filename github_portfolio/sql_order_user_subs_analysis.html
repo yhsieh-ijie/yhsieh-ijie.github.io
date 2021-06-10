@@ -1,0 +1,271 @@
+<!DOCTYPE HTML>
+<html>
+   <head>
+      <title>Yijie Hsieh Portfolio - Orders User Subscription Analysis</title>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+      <link rel="stylesheet" href="assets/css/main.css" />
+      <noscript>
+         <link rel="stylesheet" href="assets/css/noscript.css" />
+      </noscript>
+   </head>
+   <body class="is-preload">
+      <!-- Page Wrapper -->
+      <div id="page-wrapper">
+         <!-- Header -->
+         <header id="header">
+            <h1><a href="index.html">BACK</a></h1>
+            <nav>
+               <a href="#menu">Menu</a>
+            </nav>
+         </header>
+         <!-- Wrapper -->
+         <section id="wrapper">
+            <!-- Content -->
+            <div class="wrapper">
+               <div class="inner">
+                  <h3 class="major">Orders and User Subscription Analysis</h3>
+                  <p>This is an query done during the interview process for the position Sr. Data Analyst in Glovo. I first wrote 2 queries to create the 2 tables with the information given. Then the third query to retrieve everything requested.
+                     <br></br>Build a SQL query that returns a table with the following fields:
+                  <ol>
+                     <li>City Group*</li>
+                     <li>Last Week Number of Orders (closed week)</li>
+                     <li>Week over Week Number of Orders</li>
+                     <li>Last Week Number of Orders (The increase or decrease of Last week Number of Orders vs the
+                        previous)
+                     </li>
+                     <li>Last Week Number of Registrations (The number of user registrations in the app)</li>
+                     <li>Average Number of Food Orders by User Last Month</li>
+                     <li>Last Month Number of Old Active Users (number of old users that ordered last month. Old = user that did its first order the previous month or before)</li>
+                  </ol>
+                  *City Group: Is a construction from the city field. We want the following groups:
+                  <ul>
+                     <li>Group1 (contains Barcelona)</li>
+                     <li>Group2 (contains Madrid)</li>
+                     <li>Group3 (contains Valencia and Murcia)</li>
+                     <li>Group4 (contains the rest of cities, but no Gen1 cities. A Gen1 city is a city where ALL its
+                        orders are Gen1)
+                     </li>
+                  </ul>
+                  There are 2 table given:
+                  <br></br><b>Table1: Orders</b>
+                  <ul>
+                     <li>id (one unique ID for row)</li>
+                     <li>city</li>
+                     <li>user_id</li>
+                     <li>Gen1 (1 if it’s a Gen1 order, 0 if it’s Gen2. A Gen1 order is an order that is delivered by the
+                        partner itself)
+                     </li>
+                     <li>category (FOOD or GROCERIES)</li>
+                     <li>order_date (the date of the order)</li>
+                  </ul>
+                  <class="image"><img src="images/glovo_table1.png" alt=""/>
+                  <br></br><br><b>Table2: Users</b>
+                  <ul>
+                     <li>id (one unique ID for row)</li>
+                     <li>city</li>
+                     <li>registration_date (date of registration in the app)</li>
+                     <li>first_order_date (date of their first order in the app)</li>
+                  </ul>
+                  <class="image"><img src="images/glovo_table2.png" alt=""/>
+                  </p>
+                  <h4 class="major">
+                     Query1: Create Order Table
+                  </h4>
+                  <pre><code>CREATE TABLE orders (
+id int NOT NULL UNIQUE,
+city varchar(255),
+user_id int,
+Gen1 boolean,
+category varchar(255),
+order_date date);
+
+insert into dev.public.orders
+(id, city, user_id, gen1, category, order_date)
+values 
+(111,'Barcelona',456,0,'FOOD',TO_DATE('12/04/21', 'DD/MM/YY')),
+(193,'Barcelona',555,1,'FOOD',TO_DATE('12/04/21', 'DD/MM/YY')),
+(256,'Madrid',223,0,'GROCERIES',TO_DATE('12/04/21', 'DD/MM/YY')),
+(289,'Madrid',987,0,'FOOD',TO_DATE('12/04/21', 'DD/MM/YY')),
+(341,'Valencia',345,0,'FOOD',TO_DATE('12/04/21', 'DD/MM/YY')),
+(565,'Barcelona',456,1,'FOOD',TO_DATE('12/04/21', 'DD/MM/YY')),
+(989,'Murcia',444,0,'FOOD',TO_DATE('12/04/21', 'DD/MM/YY')),
+(877,'Madrid',121,0,'GROCERIES',TO_DATE('12/04/21', 'DD/MM/YY')),
+(915,'Madrid',223,0,'FOOD',TO_DATE('12/04/21', 'DD/MM/YY')),
+(916,'Barcelona',110,0,'GROCERIES',TO_DATE('12/04/21', 'DD/MM/YY')),
+(990,'Murcia',133,0,'GROCERIES',TO_DATE('12/04/21', 'DD/MM/YY')),
+(991,'Girona',566,1,'FOOD',TO_DATE('12/04/21', 'DD/MM/YY')),
+(992,'Girona',567,1,'FOOD',TO_DATE('12/04/21', 'DD/MM/YY')),
+(993,'Malaga',999,1,'FOOD',TO_DATE('12/05/21', 'DD/MM/YY')),
+(994,'Valencia',433,0,'FOOD',TO_DATE('12/05/21', 'DD/MM/YY')),
+(801,'Barcelona',555,0,'GROCERIES',TO_DATE('12/05/21', 'DD/MM/YY')),
+(802,'Madrid',129,0,'FOOD',TO_DATE('12/05/21', 'DD/MM/YY')),
+(803,'Murcia',445,1,'FOOD',TO_DATE('12/05/21', 'DD/MM/YY')),
+(804,'Murcia',446,0,'FOOD',TO_DATE('12/05/21', 'DD/MM/YY')),
+(805,'Madrid',876,0,'FOOD',TO_DATE('06/05/21', 'DD/MM/YY')),
+(806,'Malaga',199,0,'FOOD',TO_DATE('06/05/21', 'DD/MM/YY')),
+(807,'Malaga',199,1,'FOOD',TO_DATE('06/05/21', 'DD/MM/YY')),
+(808,'Barcelona',331,1,'GROCERIES',TO_DATE('06/05/21', 'DD/MM/YY')),
+(809,'Madrid',121,0,'FOOD',TO_DATE('01/05/21', 'DD/MM/YY')),
+(810,'Murcia',133,0,'FOOD',TO_DATE('01/05/21', 'DD/MM/YY'));
+									</code></pre>
+                  <h4 class="major">
+                     Query2: Create User Table
+                  </h4>
+                  <pre><code>CREATE TABLE users_glovo (
+id int NOT NULL UNIQUE,
+city varchar(255),
+registration_date date,
+first_order_date date);
+
+insert into dev.public.users_glovo (id, city, registration_date, first_order_date) values
+(110,'Barcelona',TO_DATE('04/01/21', 'DD/MM/YY'),TO_DATE('10/01/21', 'DD/MM/YY')),
+(121,'Madrid',TO_DATE('03/01/21', 'DD/MM/YY'),TO_DATE('10/01/21', 'DD/MM/YY')),
+(129,'Madrid',TO_DATE('28/12/20', 'DD/MM/YY'),TO_DATE('10/01/21', 'DD/MM/YY')),
+(133,'Murcia',TO_DATE('07/02/21', 'DD/MM/YY'),TO_DATE('07/03/21', 'DD/MM/YY')),
+(198,'Barcelona',TO_DATE('03/11/20', 'DD/MM/YY'),TO_DATE('12/3/18', 'DD/MM/YY')),
+(199,'Malaga',TO_DATE('01/03/21', 'DD/MM/YY'),TO_DATE('01/04/21', 'DD/MM/YY')),
+(223,'Madrid',TO_DATE('01/03/21', 'DD/MM/YY'),TO_DATE('11/12/20', 'DD/MM/YY')),
+(224,'Girona',TO_DATE('01/03/21', 'DD/MM/YY'),TO_DATE('10/03/21', 'DD/MM/YY')),
+(331,'Barcelona',TO_DATE('01/03/21', 'DD/MM/YY'),TO_DATE('10/03/21', 'DD/MM/YY')),
+(345,'Valencia',TO_DATE('01/03/21', 'DD/MM/YY'),TO_DATE('10/03/21', 'DD/MM/YY')),
+(433,'Valencia',TO_DATE('01/03/21', 'DD/MM/YY'),TO_DATE('10/03/21', 'DD/MM/YY')),
+(444,'Murcia',TO_DATE('01/03/21', 'DD/MM/YY'),TO_DATE('10/03/21', 'DD/MM/YY')),
+(445,'Murcia',TO_DATE('01/04/21', 'DD/MM/YY'),TO_DATE('05/04/21', 'DD/MM/YY')),
+(446,'Murcia',TO_DATE('01/04/21', 'DD/MM/YY'),TO_DATE('05/04/21', 'DD/MM/YY')),
+(456,'Barcelona',TO_DATE('01/04/21', 'DD/MM/YY'),TO_DATE('05/04/21', 'DD/MM/YY')),
+(555,'Barcelona',TO_DATE('01/04/21', 'DD/MM/YY'),TO_DATE('05/04/21', 'DD/MM/YY')),
+(566,'Girona',TO_DATE('01/04/21', 'DD/MM/YY'),TO_DATE('05/04/21', 'DD/MM/YY')),
+(567,'Girona',TO_DATE('01/04/21', 'DD/MM/YY'),TO_DATE('05/04/21', 'DD/MM/YY')),
+(876,'Madrid',TO_DATE('01/04/21', 'DD/MM/YY'),TO_DATE('05/04/21', 'DD/MM/YY')),
+(910,'Madrid',TO_DATE('01/04/21', 'DD/MM/YY'),TO_DATE('05/04/21', 'DD/MM/YY')),
+(987,'Madrid',TO_DATE('01/04/21', 'DD/MM/YY'),TO_DATE('05/04/21', 'DD/MM/YY')),
+(996,'Malaga',TO_DATE('01/04/21', 'DD/MM/YY'),TO_DATE('05/04/21', 'DD/MM/YY')),
+(997,'Valencia',TO_DATE('01/04/21', 'DD/MM/YY'),TO_DATE('05/04/21', 'DD/MM/YY')),
+(998,'Murcia',TO_DATE('01/04/21', 'DD/MM/YY'),TO_DATE('05/04/21', 'DD/MM/YY')),
+(999,'Malaga',TO_DATE('17/10/20', 'DD/MM/YY'),TO_DATE('17/01/21', 'DD/MM/YY'));
+										</code></pre>
+                  <h4 class="major">
+                     Query3: CREATE QUERY FOR THE REQUESTED KPIS
+                  </h4>
+                  <pre><code>-- Create Temp Tables --
+WITH gen1_city AS (
+        SELECT DISTINCT(city)
+        FROM orders
+        WHERE gen1 = 1 AND city IN (
+            SELECT city FROM(
+                 SELECT city, COUNT(DISTINCT gen1) AS gen1_count
+                 FROM orders
+                 GROUP BY city
+                 HAVING gen1_count = 1))),
+ merge_table AS (
+        SELECT o.id AS order_id,	
+        o.city AS order_city,
+        o.user_id AS user_id,
+        o.gen1,
+        o.category,
+        o.order_date,
+        DATEDIFF(week, DATEADD(DAY, -1, o.order_date), DATEADD(DAY, -1, GETDATE())) AS order_week_from_now,
+        u.id AS user_id_usertable,
+        u.city AS user_city,
+        u.registration_date AS user_reg_date,
+        DATEDIFF(week, DATEADD(DAY, -1, u.registration_date), DATEADD(DAY, -1, GETDATE())) AS reg_week_from_now,
+        u.first_order_date AS user_firstorderdate
+        FROM orders AS o
+        LEFT JOIN
+        users_glovo AS u
+        ON o.user_id = u.id),
+
+    -- Table: Last Week Number of Orders --
+  order_lw AS (
+        SELECT order_city, COUNT(DISTINCT order_id) AS order_count FROM merge_table WHERE order_week_from_now = 1 GROUP BY order_city),
+
+    -- Table: Week over Week Number of Orders --
+    wow_lw AS (
+        SELECT order_city_lw AS city, ISNULL((count_lw - count_l2w), count_lw) AS wow_lw
+        FROM (
+          (SELECT order_city AS order_city_lw, COUNT(DISTINCT order_id) AS count_lw
+           FROM merge_table WHERE order_week_from_now = 1 GROUP BY order_city) t1
+           LEFT JOIN
+          (SELECT order_city AS order_city_l2w, COUNT(DISTINCT order_id) AS count_l2w
+           FROM merge_table WHERE order_week_from_now = 2 GROUP BY order_city) t2
+           ON t1.order_city_lw = t2.order_city_l2w)),
+
+    -- Table: Registrations Last Week --
+  registrationsLW AS (
+        SELECT user_city, COUNT(DISTINCT user_id_usertable) FROM merge_table WHERE reg_week_from_now = 1 GROUP BY 1),
+
+    -- Table: Average Number of Food Orders by User Last Month --
+  food_order_by_user_lm AS (
+        SELECT order_city, ROUND(AVG(food_order_count),1) AS AvgOrderFood FROM
+            (SELECT order_city, user_id, CAST(COUNT(DISTINCT order_id) AS FLOAT) AS food_order_count
+            FROM merge_table
+            WHERE category = 'FOOD' AND
+            DATE_PART(MONTH, order_date) = DATE_PART(MONTH,DATEADD(MONTH, -1, GETDATE())) AND DATE_PART(YEAR, order_date) = DATE_PART(YEAR,DATEADD(MONTH, -1, GETDATE()))
+            GROUP BY order_city, user_id) GROUP BY order_city),
+
+    -- Table: Last Month Number of Old Active Users
+  user_oldactive_lm AS (
+        SELECT user_city, COUNT(DISTINCT user_id) AS old_active_user_lm FROM merge_table
+            -- ordered last month --
+            WHERE DATE_PART(MONTH, order_date) = DATE_PART(MONTH,DATEADD(MONTH, -1, GETDATE()))
+            AND DATE_PART(YEAR, order_date) = DATE_PART(YEAR,DATEADD(MONTH, -1, GETDATE()))
+            -- old active user --
+            AND (DATE_PART(YEAR, order_date)*12 + DATE_PART(MONTH, order_date)) - (DATE_PART(YEAR, user_firstorderdate)*12 + DATE_PART(MONTH, user_firstorderdate)) >=1
+        GROUP BY user_city)
+
+SELECT
+CASE
+    WHEN city LIKE '%Barcelona%' THEN 1
+    WHEN city LIKE '%Madrid%' THEN 2
+    WHEN city LIKE '%Valencia%' OR city LIKE '%Murcia%' THEN 3
+    WHEN city IN (SELECT city FROM gen1_city) THEN NULL
+    ELSE 4
+END AS city_group, *
+FROM (
+    SELECT
+        t1.order_city AS city,
+        t1.order_count AS order_count_lw,
+        t2.wow_lw,
+        t3.count AS registrations_lw,
+        t4.avgorderfood AS avg_foodorder_user_lm,
+        t5.old_active_user_lm
+    FROM order_lw t1
+    FULL OUTER JOIN wow_lw t2
+    ON t1.order_city = t2.city
+    FULL OUTER JOIN registrationsLW t3
+    ON t1.order_city = t3.user_city
+    FULL OUTER JOIN food_order_by_user_lm t4
+    ON t1.order_city = t4.order_city
+    FULL OUTER JOIN user_oldactive_lm t5
+    ON t1.order_city = t5.user_city)
+WHERE city IS NOT NULL ORDER BY city_group, city;
+										</code></pre>
+               </div>
+            </div>
+         </section>
+         <!-- Footer -->
+         <section id="footer">
+            <div class="inner">
+               <h2 class="major">Get in touch</h2>
+               <ul class="contact">
+                  <li class="icon solid fa-envelope"><a href="#">yijiehsieh515@gmail.com</a></li>
+                  <li class="icon brands fa-linkedin"><a href="#">https://www.linkedin.com/in/yijiehsieh/</a></li>
+                  <li class="icon brands fa-github"><a href="#">https://github.com/yhsieh-ijie</a></li>
+               </ul>
+               <ul class="copyright">
+                  <li>&copy; Untitled Inc. All rights reserved.</li>
+                  <li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+               </ul>
+            </div>
+         </section>
+      </div>
+      <!-- Scripts -->
+      <script src="assets/js/jquery.min.js"></script>
+      <script src="assets/js/jquery.scrollex.min.js"></script>
+      <script src="assets/js/browser.min.js"></script>
+      <script src="assets/js/breakpoints.min.js"></script>
+      <script src="assets/js/util.js"></script>
+      <script src="assets/js/main.js"></script>
+   </body>
+</html>
